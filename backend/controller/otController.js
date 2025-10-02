@@ -1,30 +1,74 @@
-// controllers/otController.js
-const db = require('../config/db');
+const {
+    listOrders,
+    getOrderById,
+    createOrder,
+    updateOrder,
+    deleteOrder
+} = require('../data/memoryStore');
 
-// CREATE: Crear una nueva OT
-exports.crearOT = async (req, res) => {
-    const { id_equipo, descripcion, prioridad } = req.body;
-    const query = 'INSERT INTO ordenes_trabajo (id_equipo, descripcion, prioridad) VALUES (?, ?, ?)';
-
-    try {
-        const [result] = await db.execute(query, [id_equipo, descripcion, prioridad]);
-        res.status(201).json({ id: result.insertId, mensaje: 'OT creada' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al crear la OT' });
-    }
+exports.obtenerOTs = (req, res) => {
+    const orders = listOrders();
+    return res.status(200).json(orders);
 };
 
-// READ: Obtener todas las OTs
-exports.obtenerOTs = async (req, res) => {
-    const query = 'SELECT * FROM ordenes_trabajo ORDER BY fecha_solicitud DESC';
+exports.crearOT = (req, res) => {
+    const { titulo, patente, mecanico, proveedorId, descripcion } = req.body;
 
-    try {
-        const [rows] = await db.query(query);
-        res.status(200).json(rows);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al obtener OTs' });
+    if (!titulo || !patente || !mecanico || !proveedorId) {
+        return res.status(400).json({ error: 'Título, patente, mecánico y proveedor son obligatorios.' });
     }
+
+    const order = createOrder(req.body);
+    return res.status(201).json(order);
 };
-// Aquí irían las funciones para obtener una OT por ID, actualizar (PUT/PATCH) y eliminar (DELETE)
+
+exports.actualizarOT = (req, res) => {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ error: 'Identificador inválido.' });
+    }
+
+    const order = updateOrder(id, req.body);
+
+    if (!order) {
+        return res.status(404).json({ error: 'Orden de trabajo no encontrada.' });
+    }
+
+    return res.status(200).json(order);
+};
+
+exports.eliminarOT = (req, res) => {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ error: 'Identificador inválido.' });
+    }
+
+    const removed = deleteOrder(id);
+
+    if (!removed) {
+        return res.status(404).json({ error: 'Orden de trabajo no encontrada.' });
+    }
+
+    return res.status(204).send();
+};
+
+exports.descargarOT = (req, res) => {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+        return res.status(400).json({ error: 'Identificador inválido.' });
+    }
+
+    const order = getOrderById(id);
+
+    if (!order) {
+        return res.status(404).json({ error: 'Orden de trabajo no encontrada.' });
+    }
+
+    res.setHeader('Content-Disposition', `attachment; filename=ot-${order.patente}-${order.id}.json`);
+    res.setHeader('Content-Type', 'application/json');
+
+    return res.status(200).send(JSON.stringify(order, null, 2));
+};

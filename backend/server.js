@@ -1,23 +1,38 @@
 // backend/server.js
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
+
+const authRoutes = require('./routes/authRoutes');
+const truckRoutes = require('./routes/truckRoutes');
+const providerRoutes = require('./routes/providerRoutes');
+const otRoutes = require('./routes/otRoutes');
+const reportRoutes = require('./routes/reportRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
+const referenceRoutes = require('./routes/referenceRoutes');
+const maintenanceRoutes = require('./routes/maintenanceRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors()); // Permite peticiones desde React (frontend)
-app.use(express.json()); // Permite a Express leer cuerpos JSON
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Rutas de Prueba
 app.get('/', (req, res) => {
     res.status(200).send('API de Mantenimiento Funcionando');
 });
 
-// Implementación de Rutas (Paso 4)
-// const otRoutes = require('./routes/otRoutes');
-// app.use('/api/ots', otRoutes); 
+app.use('/api/auth', authRoutes);
+app.use('/api/trucks', authMiddleware, truckRoutes);
+app.use('/api/providers', authMiddleware, providerRoutes);
+app.use('/api/ots', authMiddleware, otRoutes);
+app.use('/api/reports', authMiddleware, reportRoutes);
+app.use('/api/expenses', authMiddleware, expenseRoutes);
+app.use('/api/reference', authMiddleware, referenceRoutes);
+app.use('/api/maintenance-programs', authMiddleware, maintenanceRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor en puerto ${PORT}`);
