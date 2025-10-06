@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 const API_TRUCKS = API_BASE + '/trucks';
 
 const formatKm = (value) => {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import NuevaOTForm from '../components/NuevaOTForm';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 const API_OTS = API_BASE + '/ots';
 const API_PROVIDERS = API_BASE + '/providers';
 const API_TRUCKS = API_BASE + '/trucks';
@@ -46,8 +46,7 @@ function NuevaOTPage() {
     );
 
     const authHeaders = useMemo(() => ({
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
+        Authorization: 'Bearer ' + token
     }), [token]);
 
     const fetchOrders = useCallback(async () => {
@@ -188,7 +187,7 @@ function NuevaOTPage() {
         try {
             const response = await fetch(endpoint, {
                 method,
-                headers: authHeaders,
+                headers: { ...authHeaders, 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 

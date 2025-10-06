@@ -62,7 +62,6 @@ function CamionForm({ onSuccess }) {
             // Utilizamos la misma ruta genérica de Assets que creamos antes
             const response = await fetch('http://localhost:443/api/assets', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datosCamion), 
             });
 

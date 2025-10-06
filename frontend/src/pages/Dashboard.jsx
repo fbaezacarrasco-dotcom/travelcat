@@ -14,7 +14,7 @@ import {
     Legend
 } from 'recharts';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 const API_OTS = API_BASE + '/ots';
 const API_REPORT = API_BASE + '/reports/dashboard';
 

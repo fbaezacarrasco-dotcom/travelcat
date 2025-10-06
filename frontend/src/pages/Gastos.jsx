@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 const API_EXPENSES = API_BASE + '/expenses';
 
 const formatCurrency = (value) =>
@@ -27,11 +27,6 @@ function Gastos() {
     const [budgetInput, setBudgetInput] = useState('');
     const [budgetStatus, setBudgetStatus] = useState(null);
     const [updatingBudget, setUpdatingBudget] = useState(false);
-
-    const headers = useMemo(() => ({
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-    }), [token]);
 
     const fetchGastos = useCallback(async () => {
         if (!token) return;
@@ -119,8 +114,7 @@ function Gastos() {
             const response = await fetch(`${API_EXPENSES}/budget`, {
                 method: 'PUT',
                 headers: {
-                    Authorization: 'Bearer ' + token,
-                    'Content-Type': 'application/json'
+                    Authorization: 'Bearer ' + token
                 },
                 body: JSON.stringify({ presupuestoAnual: monto })
             });
@@ -166,7 +160,7 @@ function Gastos() {
         try {
             const response = await fetch(API_EXPENSES, {
                 method: 'POST',
-                headers,
+                headers: { Authorization: 'Bearer ' + token },
                 body: payload
             });
 

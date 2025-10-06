@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 const initialState = {
     email: 'admin@example.com',
-    password: 'admin123'
+    password: ''
 };
 
 function Login() {
@@ -97,9 +97,6 @@ function Login() {
                     </button>
                 </form>
 
-                <p className="small text-muted mt-3 mb-0">
-                    * Usuario demo precargado: admin@example.com / admin123
-                </p>
             </div>
         </div>
     );

@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 const API_LOGIN = API_BASE + '/auth/login';
 const API_LOGOUT = API_BASE + '/auth/logout';
 const API_PROFILE = API_BASE + '/auth/profile';
+
+console.log('API_LOGIN:', API_LOGIN);
 
 const AuthContext = createContext(null);
 
@@ -56,37 +58,55 @@ export function AuthProvider({ children }) {
     };
 
     const login = async ({ email, password }) => {
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
-        try {
-            const response = await fetch(API_LOGIN, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+    try {
+        const response = await fetch(API_LOGIN, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'  // ✅ necesario para enviar JSON
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-            if (!response.ok) {
-                const payload = await response.json().catch(() => ({}));
-                const message = payload.error || 'Credenciales inválidas.';
-                throw new Error(message);
+        const contentType = response.headers.get('content-type');
+
+        if (!response.ok) {
+            // Intenta parsear error en JSON, si no se puede, captura como texto
+            if (contentType && contentType.includes('application/json')) {
+                const payload = await response.json();
+                throw new Error(payload.error || 'Credenciales inválidas.');
+            } else {
+                const text = await response.text();
+                console.error('Respuesta inesperada del servidor:', text);
+                throw new Error('Error inesperado del servidor.');
             }
-
-            const data = await response.json();
-            setToken(data.token);
-            setUser(data.user);
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('authUser', JSON.stringify(data.user));
-            return { ok: true };
-        } catch (loginError) {
-            const message = loginError.message || 'Error al iniciar sesión.';
-            setError(message);
-            clearAuthState();
-            return { ok: false, error: message };
-        } finally {
-            setLoading(false);
         }
-    };
+
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Respuesta inesperada (no JSON):', text);
+            throw new Error('El servidor devolvió una respuesta no válida.');
+        }
+
+        const data = await response.json();
+
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('authUser', JSON.stringify(data.user));
+
+        return { ok: true };
+    } catch (loginError) {
+        const message = loginError.message || 'Error al iniciar sesión.';
+        setError(message);
+        clearAuthState();
+        return { ok: false, error: message };
+    } finally {
+        setLoading(false);
+    }
+};
 
     const logout = async () => {
         if (!token) {
