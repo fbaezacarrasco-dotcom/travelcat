@@ -201,7 +201,7 @@ let maintenancePrograms = [
     }
 ];
 
-const GASTO_PRESUPUESTO_ANUAL = 15000000;
+let gastoPresupuestoAnual = 15000000;
 
 const sessions = new Map();
 let nextTruckId = trucks.length + 1;
@@ -609,10 +609,19 @@ function getMaintenanceAlerts() {
 function getBudgetInfo() {
     const totalGastado = expenses.reduce((acc, item) => acc + item.costo, 0);
     return {
-        presupuestoAnual: GASTO_PRESUPUESTO_ANUAL,
+        presupuestoAnual: gastoPresupuestoAnual,
         gastado: totalGastado,
-        disponible: Math.max(GASTO_PRESUPUESTO_ANUAL - totalGastado, 0)
+        disponible: Math.max(gastoPresupuestoAnual - totalGastado, 0)
     };
+}
+
+function updateBudget(amount) {
+    const monto = Number(amount);
+    if (!Number.isFinite(monto) || monto < 0) {
+        return getBudgetInfo();
+    }
+    gastoPresupuestoAnual = monto;
+    return getBudgetInfo();
 }
 
 function getCostsByTruck() {
@@ -667,5 +676,6 @@ module.exports = {
     deleteMaintenanceProgram,
     getMaintenanceAlerts,
     getBudgetInfo,
+    updateBudget,
     getCostsByTruck
 };

@@ -147,6 +147,18 @@ function Camiones() {
             value = value.replace(/[^0-9]/g, '');
         }
 
+        if (name === 'marca' || name === 'modelo') {
+            value = value.replace(/[^\p{L}0-9\s.-]/gu, '').slice(0, 80);
+        }
+
+        if (name === 'conductor') {
+            value = value.replace(/[^\p{L}\s]/gu, '').replace(/\s{2,}/g, ' ').slice(0, 80);
+        }
+
+        if (name === 'notas') {
+            value = value.replace(/[^\p{L}0-9\s.,-]/gu, '').slice(0, 300);
+        }
+
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 

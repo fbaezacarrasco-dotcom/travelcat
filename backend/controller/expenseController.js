@@ -1,7 +1,8 @@
 const {
     listExpenses,
     createExpense,
-    getBudgetInfo
+    getBudgetInfo,
+    updateBudget
 } = require('../data/memoryStore');
 
 exports.obtenerGastos = (req, res) => {
@@ -36,4 +37,16 @@ exports.registrarGasto = (req, res) => {
         boletaMime: file ? file.mimetype : null
     });
     return res.status(201).json(nuevoGasto);
+};
+
+exports.actualizarPresupuesto = (req, res) => {
+    const { presupuestoAnual } = req.body || {};
+    const monto = Number(presupuestoAnual);
+
+    if (!Number.isFinite(monto) || monto <= 0) {
+        return res.status(400).json({ error: 'El presupuesto debe ser un numero mayor a cero.' });
+    }
+
+    const info = updateBudget(monto);
+    return res.status(200).json(info);
 };

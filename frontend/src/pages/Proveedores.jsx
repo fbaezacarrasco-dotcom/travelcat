@@ -120,6 +120,17 @@ function Proveedores() {
             setFormData((prev) => ({ ...prev, telefono: sanitized }));
             return;
         }
+        if (name === 'contacto') {
+            const sanitized = value.replace(/[^\p{L}\s]/gu, '').replace(/\s{2,}/g, ' ').slice(0, 80);
+            setFormData((prev) => ({ ...prev, contacto: sanitized }));
+            return;
+        }
+
+        if (name === 'razonSocial' || name === 'empresa' || name === 'rubro') {
+            const sanitized = value.replace(/[^\p{L}0-9\s.,-]/gu, '').slice(0, 120);
+            setFormData((prev) => ({ ...prev, [name]: sanitized }));
+            return;
+        }
 
         setFormData((prev) => ({ ...prev, [name]: value }));
     };

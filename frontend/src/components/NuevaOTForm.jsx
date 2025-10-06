@@ -41,6 +41,8 @@ function NuevaOTForm({
                             value={formData.titulo}
                             onChange={(event) => onFieldChange(event.target.name, event.target.value)}
                             className="form-control"
+                            maxLength={120}
+                            inputMode="text"
                             placeholder="Ej. Cambio de filtros"
                             required
                         />
@@ -69,6 +71,8 @@ function NuevaOTForm({
                             value={formData.mecanico}
                             onChange={(event) => onFieldChange(event.target.name, event.target.value)}
                             className="form-control"
+                            maxLength={60}
+                            inputMode="text"
                             placeholder="Ej. Pedro Salinas"
                             required
                         />
@@ -145,6 +149,7 @@ function NuevaOTForm({
                         onChange={(event) => onFieldChange(event.target.name, event.target.value)}
                         className="form-control"
                         rows="3"
+                        maxLength={400}
                         placeholder="Detalle el trabajo a realizar"
                         required
                     />
@@ -193,6 +198,7 @@ function NuevaOTForm({
                                                         className="form-control form-control-sm"
                                                         value={item.nombre}
                                                         onChange={(event) => onRepuestoChange(index, 'nombre', event.target.value)}
+                                                        maxLength={80}
                                                         placeholder="Ej. Filtro de aceite"
                                                         required
                                                     />
@@ -203,6 +209,7 @@ function NuevaOTForm({
                                                         className="form-control form-control-sm"
                                                         value={item.cantidad}
                                                         min="0"
+                                                        inputMode="numeric"
                                                         onChange={(event) => onRepuestoChange(index, 'cantidad', event.target.value)}
                                                         required
                                                     />
@@ -214,6 +221,7 @@ function NuevaOTForm({
                                                         value={item.costo}
                                                         min="0"
                                                         step="100"
+                                                        inputMode="numeric"
                                                         onChange={(event) => onRepuestoChange(index, 'costo', event.target.value)}
                                                         required
                                                     />

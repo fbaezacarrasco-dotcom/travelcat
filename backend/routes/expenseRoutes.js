@@ -6,4 +6,6 @@ const upload = require('../middleware/upload');
 router.get('/', expenseController.obtenerGastos);
 router.post('/', upload.single('boleta'), expenseController.registrarGasto);
 
+router.put('/budget', expenseController.actualizarPresupuesto);
+
 module.exports = router;

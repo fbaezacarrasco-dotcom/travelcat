@@ -104,10 +104,27 @@ function NuevaOTPage() {
         fetchCatalogs();
     }, [fetchOrders, fetchCatalogs]);
 
-    const handleFieldChange = (name, value) => {
-        if (name === 'patente') {
-            setFormData((prev) => ({ ...prev, patente: value.toUpperCase() }));
-            return;
+    const handleFieldChange = (name, rawValue) => {
+        let value = rawValue;
+
+        if (typeof rawValue === 'string') {
+            switch (name) {
+                case 'patente':
+                    value = rawValue.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 10);
+                    break;
+                case 'titulo':
+                    value = rawValue.replace(/[^\p{L}0-9\s.,-]/gu, '').replace(/^\s+/u, '').slice(0, 120);
+                    break;
+                case 'mecanico':
+                case 'conductor':
+                    value = rawValue.replace(/[^\p{L}\s]/gu, '').replace(/\s{2,}/g, ' ').replace(/^\s+/u, '').slice(0, 60);
+                    break;
+                case 'descripcion':
+                    value = rawValue.replace(/[^\p{L}0-9\s.,-]/gu, '').replace(/^\s+/u, '').slice(0, 400);
+                    break;
+                default:
+                    break;
+            }
         }
 
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -120,9 +137,15 @@ function NuevaOTPage() {
         }));
     };
 
-    const handleRepuestoChange = (index, field, value) => {
-        if (field === 'cantidad' || field === 'costo') {
-            value = value.replace(/[^0-9]/g, '');
+    const handleRepuestoChange = (index, field, rawValue) => {
+        let value = rawValue;
+
+        if (typeof rawValue === 'string') {
+            if (field === 'cantidad' || field === 'costo') {
+                value = rawValue.replace(/[^0-9]/g, '').slice(0, 9);
+            } else if (field === 'nombre') {
+                value = rawValue.replace(/[^\p{L}0-9\s.,-]/gu, '').replace(/^\s+/u, '').slice(0, 80);
+            }
         }
 
         setFormData((prev) => ({

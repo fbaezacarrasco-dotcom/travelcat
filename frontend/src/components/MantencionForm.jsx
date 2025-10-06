@@ -17,6 +17,7 @@ const MantencionForm = ({ formData, handleChange, handleSubmit, camiones, cargan
                         value={formData.patente}
                         onChange={handleChange}
                         className="form-control"
+                        maxLength={10}
                         placeholder={cargandoCamiones ? 'Cargando camiones...' : 'Ej. AA-BB11'}
                         required
                     />
@@ -37,6 +38,7 @@ const MantencionForm = ({ formData, handleChange, handleSubmit, camiones, cargan
                         value={formData.tarea}
                         onChange={handleChange}
                         className="form-control"
+                        maxLength={120}
                         placeholder="Ej. Cambio de aceite motor"
                         required
                     />
@@ -78,6 +80,7 @@ const MantencionForm = ({ formData, handleChange, handleSubmit, camiones, cargan
                             onChange={handleChange}
                             className="form-control"
                             inputMode="numeric"
+                            pattern="[0-9]*"
                             required
                         />
                     </div>
@@ -92,6 +95,7 @@ const MantencionForm = ({ formData, handleChange, handleSubmit, camiones, cargan
                             onChange={handleChange}
                             className="form-control"
                             inputMode="numeric"
+                            pattern="[0-9]*"
                             required
                         />
                         <div className="form-text">Ingresa el valor numérico sin puntos.</div>

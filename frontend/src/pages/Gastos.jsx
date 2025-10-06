@@ -24,6 +24,9 @@ function Gastos() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [message, setMessage] = useState(null);
+    const [budgetInput, setBudgetInput] = useState('');
+    const [budgetStatus, setBudgetStatus] = useState(null);
+    const [updatingBudget, setUpdatingBudget] = useState(false);
 
     const headers = useMemo(() => ({
         Authorization: 'Bearer ' + token,
@@ -45,6 +48,7 @@ function Gastos() {
             const data = await response.json();
             setGastos(data.gastos || []);
             setPresupuesto(data.presupuesto || null);
+            setBudgetInput(data.presupuesto?.presupuestoAnual ? String(data.presupuesto.presupuestoAnual) : '');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -68,7 +72,14 @@ function Gastos() {
         }
 
         if (name === 'patente') {
-            setFormData((prev) => ({ ...prev, patente: value.toUpperCase() }));
+            const sanitized = value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 10);
+            setFormData((prev) => ({ ...prev, patente: sanitized }));
+            return;
+        }
+
+        if (name === 'concepto') {
+            const sanitized = value.replace(/[^\p{L}0-9\s.,-]/gu, '').slice(0, 120);
+            setFormData((prev) => ({ ...prev, concepto: sanitized }));
             return;
         }
 
@@ -79,6 +90,55 @@ function Gastos() {
         }
 
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleBudgetChange = (event) => {
+        const numeric = event.target.value.replace(/[^0-9]/g, '');
+        setBudgetInput(numeric);
+        if (budgetStatus) {
+            setBudgetStatus(null);
+        }
+    };
+
+    const handleBudgetSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!token) return;
+
+        const monto = Number(budgetInput);
+
+        if (!budgetInput.trim() || !Number.isFinite(monto) || monto <= 0) {
+            setBudgetStatus({ type: 'warning', text: 'Ingresa un monto valido mayor a cero.' });
+            return;
+        }
+
+        setUpdatingBudget(true);
+        setBudgetStatus(null);
+
+        try {
+            const response = await fetch(`${API_EXPENSES}/budget`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ presupuestoAnual: monto })
+            });
+
+            if (!response.ok) {
+                const body = await response.json().catch(() => ({}));
+                throw new Error(body.error || 'No se pudo actualizar el presupuesto.');
+            }
+
+            const data = await response.json();
+            setPresupuesto(data);
+            setBudgetInput(String(data.presupuestoAnual));
+            setBudgetStatus({ type: 'success', text: 'Presupuesto actualizado correctamente.' });
+        } catch (updateError) {
+            setBudgetStatus({ type: 'danger', text: updateError.message });
+        } finally {
+            setUpdatingBudget(false);
+        }
     };
 
     const handleSubmit = async (event) => {
@@ -166,6 +226,7 @@ function Gastos() {
                                         value={formData.patente}
                                         onChange={handleChange}
                                         className="form-control"
+                                        maxLength={10}
                                         placeholder="AA-BB11"
                                         required
                                     />
@@ -179,6 +240,7 @@ function Gastos() {
                                         value={formData.concepto}
                                         onChange={handleChange}
                                         className="form-control"
+                                        maxLength={120}
                                         placeholder="Ej. Cambio de neumáticos"
                                         required
                                     />
@@ -192,6 +254,7 @@ function Gastos() {
                                             value={formData.costo}
                                             onChange={handleChange}
                                             className="form-control"
+                                            maxLength={9}
                                             inputMode="numeric"
                                             required
                                         />
@@ -254,6 +317,27 @@ function Gastos() {
                                         }}
                                     ></div>
                                 </div>
+                                <hr className="my-3" />
+                                {budgetStatus && (
+                                    <div className={`alert alert-${budgetStatus.type}`} role="alert">
+                                        {budgetStatus.text}
+                                    </div>
+                                )}
+                                <form onSubmit={handleBudgetSubmit} className="d-flex gap-2">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={budgetInput}
+                                        onChange={handleBudgetChange}
+                                        inputMode="numeric"
+                                        maxLength={12}
+                                        placeholder="Ej. 20000000"
+                                    />
+                                    <button type="submit" className="btn btn-outline-primary" disabled={updatingBudget}>
+                                        {updatingBudget ? "Guardando..." : "Actualizar"}
+                                    </button>
+                                </form>
+                                <div className="form-text">Monto anual en CLP, sin separadores.</div>
                             </div>
                         </div>
                     )}
